@@ -1,0 +1,825 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Our Little Universe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Nunito:wght@400;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a night-sky love story in five pages. A live starfield sits behind everything. Header shows the page dots, the stage slides pages like a story, the footer holds Back / Next. Single committed dark look, rose and gold light on deep indigo. */
+:root {
+  --night: #130e2b;
+  --dusk: #2b1a4f;
+  --rose: #ff6f91;
+  --blush: #ffc2d1;
+  --gold: #ffd98a;
+  --cream: #fff4ec;
+  --mist: #b9a9dc;
+  --glass: rgba(255, 244, 236, 0.08);
+  --glass-line: rgba(255, 194, 209, 0.28);
+  --font-display: 'Young Serif', Georgia, serif;
+  --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-hand: 'Caveat', 'Segoe Script', cursive;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(70rem 40rem at 50% 110%, #5b2a63 0%, transparent 60%),
+    linear-gradient(180deg, var(--night) 0%, var(--dusk) 100%);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.55;
+  overflow: hidden;
+}
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 60; pointer-events: none; }
+
+.app {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-block: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  max-width: 720px;
+  margin: 0 auto;
+}
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pageName { font-family: var(--font-hand); font-weight: 700; font-size: 22px; color: var(--gold); margin: 0; }
+.dots { display: flex; gap: 10px; }
+.dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 1.5px solid var(--blush);
+  background: transparent;
+  padding: 0; cursor: pointer;
+  transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.dot.seen { background: rgba(255, 194, 209, 0.5); }
+.dot.now { background: var(--rose); border-color: var(--rose); transform: scale(1.4); box-shadow: 0 0 12px var(--rose); }
+.dot:focus-visible, .btn:focus-visible, .env:focus-visible, .holdBtn:focus-visible, .reason:focus-visible, canvas:focus-visible, .wishBtn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.stage { position: relative; flex: 1; min-height: 0; }
+.page {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  opacity: 0; visibility: hidden;
+  transform: translateY(24px);
+  transition: opacity 0.6s, transform 0.7s cubic-bezier(.2, .8, .2, 1), visibility 0s 0.7s;
+  -webkit-overflow-scrolling: touch;
+}
+.page.on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.page-in {
+  min-height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; text-align: center;
+  padding: 8px 2px 20px;
+}
+
+.nav { display: flex; justify-content: space-between; gap: 12px; }
+.btn {
+  font: 700 17px/1 var(--font-body);
+  color: var(--night);
+  background: linear-gradient(135deg, var(--blush), var(--rose));
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 26px;
+  cursor: pointer;
+  box-shadow: 0 6px 24px -6px rgba(255, 111, 145, 0.7);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+}
+.btn:active { transform: scale(0.96); }
+.btn.ghost { background: var(--glass); color: var(--cream); border: 1px solid var(--glass-line); box-shadow: none; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn[hidden] { display: none; }
+
+h1, h2, p { margin: 0; }
+.eyebrow { font-family: var(--font-hand); font-size: 24px; color: var(--gold); }
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.02;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+.h-xl { font-size: clamp(44px, 12.5vw, 80px); }
+.h-lg { font-size: clamp(32px, 8.5vw, 48px); }
+.rose { color: var(--rose); }
+.gold { color: var(--gold); }
+.lede { max-width: 36ch; color: var(--blush); }
+.script { font-family: var(--font-hand); font-weight: 700; font-size: 26px; line-height: 1.2; }
+.chip {
+  display: inline-block;
+  padding: 5px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-line);
+  background: var(--glass);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blush);
+  font-variant-numeric: tabular-nums;
+}
+
+/* page 1 */
+.moon {
+  width: min(190px, 48vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #fffbe9 0%, #ffe9b0 55%, #f2c978 100%);
+  box-shadow: 0 0 60px 12px rgba(255, 217, 138, 0.35), 0 0 160px 40px rgba(255, 111, 145, 0.18);
+  position: relative;
+  animation: moonFloat 6s ease-in-out infinite;
+}
+.moon::before, .moon::after { content: ""; position: absolute; border-radius: 50%; background: rgba(214, 162, 92, 0.28); }
+.moon::before { width: 20%; height: 20%; left: 56%; top: 20%; }
+.moon::after { width: 13%; height: 13%; left: 24%; top: 58%; }
+.moon i { position: absolute; width: 9%; height: 9%; left: 62%; top: 62%; border-radius: 50%; background: rgba(214, 162, 92, 0.28); }
+@keyframes moonFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.wish {
+  min-height: 2.6em;
+  max-width: 30ch;
+  font-family: var(--font-hand);
+  font-size: 26px;
+  line-height: 1.15;
+  color: var(--gold);
+}
+.wishBtn { font: inherit; }
+
+/* page 2 */
+.constWrap { position: relative; width: min(400px, 100%); aspect-ratio: 1; max-width: 100%; }
+#const {
+  width: 100%; height: 100%; display: block;
+  border-radius: 24px;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 111, 145, 0.12), transparent 70%), var(--glass);
+  border: 1px solid var(--glass-line);
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.reveal { font-family: var(--font-display); font-size: 22px; color: var(--gold); min-height: 2.2em; max-width: 26ch; text-wrap: balance; }
+
+/* page 3 */
+.envs { width: 100%; max-width: 520px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.env {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--glass-line);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255, 194, 209, 0.18), rgba(255, 244, 236, 0.06));
+  color: var(--cream);
+  font: inherit;
+  padding: 26px 12px 16px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: transform 0.25s, background 0.25s, border-color 0.25s;
+}
+.env:hover { transform: translateY(-3px); }
+.env[aria-pressed="true"] { background: linear-gradient(160deg, rgba(255, 111, 145, 0.4), rgba(255, 194, 209, 0.12)); border-color: var(--rose); }
+.env .flap {
+  position: absolute; left: 0; right: 0; top: 0; height: 22px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: rgba(255, 194, 209, 0.32);
+}
+.env .seal {
+  position: absolute; top: 8px; left: 50%; width: 16px; height: 16px; transform: translateX(-50%);
+  border-radius: 50%; background: var(--rose); box-shadow: 0 0 10px var(--rose);
+}
+.env .open { font-family: var(--font-hand); font-size: 20px; color: var(--gold); line-height: 1; }
+.env .when { font-family: var(--font-display); font-size: 18px; line-height: 1.1; }
+.paper {
+  width: 100%; max-width: 520px;
+  background: var(--cream);
+  color: #3a2347;
+  border-radius: 6px;
+  padding: 20px 22px;
+  font-family: var(--font-hand);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.3;
+  text-align: left;
+  box-shadow: 0 20px 50px -18px rgba(0, 0, 0, 0.7);
+  transform: rotate(-0.8deg);
+  animation: unfold 0.5s cubic-bezier(.2, .9, .3, 1) both;
+}
+@keyframes unfold { from { opacity: 0; transform: translateY(14px) rotate(-3deg) scale(0.96); } to { opacity: 1; transform: translateY(0) rotate(-0.8deg) scale(1); } }
+.paper .to { font-weight: 700; color: #b8365a; margin-bottom: 6px; }
+
+/* page 4 */
+.hugScene { width: min(440px, 100%); }
+.hugScene svg { width: 100%; height: auto; display: block; overflow: visible; }
+.hugScene .eyesClosed { display: none; }
+.hugScene.closed .eyesOpen { display: none; }
+.hugScene.closed .eyesClosed { display: inline; }
+.lean-l { transition: transform 0.35s; }
+.hugScene.kiss .lean-l { transform: rotate(7deg); }
+.hugScene.kiss .lean-r { transform: rotate(-7deg); }
+.lean-l, .lean-r { transform-box: fill-box; transform-origin: 50% 100%; transition: transform 0.35s; }
+.meter { width: min(300px, 80%); height: 14px; border-radius: 999px; background: var(--glass); border: 1px solid var(--glass-line); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--blush), var(--rose)); box-shadow: 0 0 14px var(--rose); }
+.holdBtn {
+  font: 700 19px/1 var(--font-body);
+  color: var(--night);
+  background: linear-gradient(135deg, var(--gold), var(--blush));
+  border: 0; border-radius: 999px;
+  padding: 16px 34px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none; -webkit-user-select: none;
+  box-shadow: 0 8px 28px -8px rgba(255, 217, 138, 0.7);
+}
+.holdBtn.active { transform: scale(0.95); }
+.row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.status { min-height: 2.8em; max-width: 32ch; font-family: var(--font-hand); font-size: 25px; line-height: 1.15; color: var(--gold); }
+.mwah {
+  position: fixed; left: 50%; top: 42%;
+  z-index: 70; pointer-events: none;
+  font-family: var(--font-hand); font-weight: 700; font-size: 64px; color: var(--rose);
+  text-shadow: 0 0 24px rgba(255, 111, 145, 0.8);
+  animation: mwah 1.4s ease-out forwards;
+}
+@keyframes mwah {
+  0% { opacity: 0; transform: translate(-50%, 20px) scale(0.4) rotate(-8deg); }
+  25% { opacity: 1; transform: translate(-50%, -10px) scale(1.2) rotate(4deg); }
+  100% { opacity: 0; transform: translate(-50%, -120px) scale(1) rotate(-3deg); }
+}
+
+/* page 5 */
+.reason {
+  width: 100%; max-width: 440px;
+  min-height: 118px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-line);
+  background: var(--glass);
+  color: var(--cream);
+  font: inherit;
+  padding: 18px 20px;
+  cursor: pointer;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px;
+  transition: transform 0.2s;
+}
+.reason:active { transform: scale(0.98); }
+.reason .n { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mist); font-variant-numeric: tabular-nums; }
+.reason .t { font-family: var(--font-display); font-size: 22px; line-height: 1.2; text-wrap: balance; }
+.letter {
+  width: 100%; max-width: 480px;
+  background: var(--cream);
+  color: #3a2347;
+  border-radius: 6px;
+  padding: 24px 24px 20px;
+  text-align: left;
+  font-family: var(--font-hand);
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 1.3;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  transform: rotate(0.6deg);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.letter .sig { font-weight: 700; color: #b8365a; font-size: 28px; }
+.vows { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; max-width: 440px; width: 100%; text-align: left; }
+.vows li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; min-width: 0; }
+.vows li svg { width: 20px; height: 20px; margin-top: 4px; }
+.floaty { position: fixed; bottom: -40px; z-index: 5; pointer-events: none; width: 24px; height: 24px; animation: floatUp 7s linear forwards; }
+@keyframes floatUp { 0% { transform: translateY(0) translateX(0) scale(0.6); opacity: 0; } 12% { opacity: 0.9; } 100% { transform: translateY(-105vh) translateX(var(--dx, 0)) scale(1.1); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .paper, .mwah { opacity: 1; }
+}
+</style>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<div class="app">
+  <header class="top">
+    <p class="pageName" id="pageName">1 of 5 · Hello, love</p>
+    <nav class="dots" id="dots" aria-label="Pages"></nav>
+  </header>
+
+  <main class="stage">
+    <!-- 1 -->
+    <section class="page on" id="p1" aria-label="Hello, love">
+      <div class="page-in">
+        <p class="eyebrow">made only for</p>
+        <h1 class="display h-xl" id="title1">my whole <span class="rose">universe</span></h1>
+        <div class="moon" aria-hidden="true"><i></i></div>
+        <p class="lede">I built a small sky where only you and I live. Take your time, there is a lot of love in here.</p>
+        <button class="btn ghost wishBtn" id="wishBtn" type="button">Make a wish</button>
+        <p class="wish" id="wish" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="page" id="p2" aria-label="The star that is you" inert>
+      <div class="page-in">
+        <h2 class="display h-lg">Connect the <span class="gold">stars</span></h2>
+        <p class="lede">Tap the glowing star each time. Follow the light and see what it draws.</p>
+        <div class="constWrap">
+          <canvas id="const" tabindex="0" aria-label="Constellation puzzle. Tap the glowing stars in order. Press Enter to reveal the heart."></canvas>
+        </div>
+        <span class="chip" id="starCount">0 of 10 stars lit</span>
+        <p class="reveal" id="reveal" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="page" id="p3" aria-label="Open when letters" inert>
+      <div class="page-in">
+        <h2 class="display h-lg">Open when…</h2>
+        <p class="lede">Four little letters for the days you need me, even when I can't be there.</p>
+        <div class="envs" id="envs"></div>
+        <div id="paperSlot" style="width:100%;display:flex;justify-content:center"></div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="page" id="p4" aria-label="Hug and kiss" inert>
+      <div class="page-in">
+        <h2 class="display h-lg">Come here, <span class="rose">you</span></h2>
+        <div class="hugScene" id="hugScene">
+          <svg viewBox="0 0 400 240" role="img" aria-label="Two little blobs, one pink with a bow and one blue with a tuft of hair, moving closer to hug">
+            <ellipse cx="200" cy="222" rx="150" ry="10" fill="#000" opacity=".25"/>
+            <g id="gL">
+              <g class="lean-l">
+                <ellipse cx="0" cy="150" rx="46" ry="58" fill="#ffc2d1"/>
+                <path d="M-14 94 q-18 -18 -4 -26 q10 2 18 20z M14 94 q18 -18 4 -26 q-10 2 -18 20z" fill="#ff6f91"/>
+                <circle cx="0" cy="92" r="6" fill="#ff6f91"/>
+                <ellipse cx="-27" cy="162" rx="9" ry="6" fill="#ff6f91" opacity=".6"/>
+                <ellipse cx="27" cy="162" rx="9" ry="6" fill="#ff6f91" opacity=".6"/>
+                <g class="eyesOpen" fill="#2b1a4f"><ellipse cx="-17" cy="144" rx="5" ry="8"/><ellipse cx="17" cy="144" rx="5" ry="8"/>
+                  <circle cx="-15" cy="141" r="2" fill="#fff"/><circle cx="19" cy="141" r="2" fill="#fff"/></g>
+                <g class="eyesClosed" fill="none" stroke="#2b1a4f" stroke-width="3.5" stroke-linecap="round"><path d="M-24 146 q7 -8 14 0"/><path d="M10 146 q7 -8 14 0"/></g>
+                <path d="M-8 166 q8 8 16 0" fill="none" stroke="#2b1a4f" stroke-width="3.5" stroke-linecap="round"/>
+              </g>
+            </g>
+            <g id="gR">
+              <g class="lean-r">
+                <ellipse cx="0" cy="150" rx="46" ry="58" fill="#9fd3ff"/>
+                <path d="M-6 94 q-4 -22 6 -26 q2 12 10 24z" fill="#5a86d6"/>
+                <ellipse cx="-27" cy="162" rx="9" ry="6" fill="#ff6f91" opacity=".5"/>
+                <ellipse cx="27" cy="162" rx="9" ry="6" fill="#ff6f91" opacity=".5"/>
+                <g class="eyesOpen" fill="#2b1a4f"><ellipse cx="-17" cy="144" rx="5" ry="8"/><ellipse cx="17" cy="144" rx="5" ry="8"/>
+                  <circle cx="-15" cy="141" r="2" fill="#fff"/><circle cx="19" cy="141" r="2" fill="#fff"/></g>
+                <g class="eyesClosed" fill="none" stroke="#2b1a4f" stroke-width="3.5" stroke-linecap="round"><path d="M-24 146 q7 -8 14 0"/><path d="M10 146 q7 -8 14 0"/></g>
+                <path d="M-8 166 q8 8 16 0" fill="none" stroke="#2b1a4f" stroke-width="3.5" stroke-linecap="round"/>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="meter" role="progressbar" aria-label="Hug progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="meterBox"><i id="meter"></i></div>
+        <p class="status" id="status" aria-live="polite">Press and hold the button, and don't let go.</p>
+        <div class="row">
+          <button class="holdBtn" id="hold" type="button">Hold to hug</button>
+          <button class="btn ghost" id="kiss" type="button" disabled>Send a kiss</button>
+        </div>
+        <span class="chip" id="counts">Hugs 0 · Kisses 0</span>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="page" id="p5" aria-label="My love letter" inert>
+      <div class="page-in">
+        <p class="eyebrow">the last page, and the truest one</p>
+        <h2 class="display h-lg">Why I love <span class="rose">you</span></h2>
+        <button class="reason" id="reason" type="button" aria-live="polite">
+          <span class="n" id="rn"></span>
+          <span class="t" id="rt"></span>
+        </button>
+        <span class="chip">tap the card for the next reason</span>
+
+        <div class="letter">
+          <p id="dear">My love,</p>
+          <p>Every day I want to give you a little more happiness than the day before. Not only on good days. On the tired ones, the quiet ones, and the days you can't explain.</p>
+          <p>I want to hold you, kiss you and make you laugh until your cheeks hurt. I want you to feel safe, silly and completely adored, because you are.</p>
+          <p>You are my favourite person, my calm and my home.</p>
+          <p class="sig">Forever yours.</p>
+        </div>
+
+        <ul class="vows" id="vows"></ul>
+
+        <h2 class="display h-lg">I love you. <span class="gold">So much.</span></h2>
+        <button class="btn" id="sendLove" type="button">Send me a heart</button>
+        <span class="chip" id="loveCount">Hearts sent: 0</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="nav">
+    <button class="btn ghost" id="back" type="button">← Back</button>
+    <button class="btn" id="next" type="button">Begin →</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var NAME = ''; // her name or pet name goes here, for example 'Riya'
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var TAU = Math.PI * 2;
+  function clamp(x, a, b) { return Math.min(b, Math.max(a, x)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function ease(t) { return t * t * (3 - 2 * t); }
+
+  if (NAME) {
+    $('#title1').innerHTML = 'hey, <span class="rose"></span>';
+    $('#title1 .rose').textContent = NAME;
+    $('#dear').textContent = 'My love ' + NAME + ',';
+  }
+
+  var cur = 0;
+  var vw = innerWidth, vh = innerHeight, dpr = 1;
+
+  /* ---------- starfield ---------- */
+  var bg = $('#bg'), bc = bg.getContext('2d');
+  var stars = [], shoot = [];
+  function fitBg() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    vw = innerWidth; vh = innerHeight;
+    bg.width = Math.round(vw * dpr); bg.height = Math.round(vh * dpr);
+    stars = [];
+    var n = Math.round(vw * vh / 5200);
+    for (var i = 0; i < n; i++) stars.push({ x: Math.random() * vw, y: Math.random() * vh, r: 0.4 + Math.random() * 1.4, p: Math.random() * TAU, s: 0.6 + Math.random() * 1.6 });
+  }
+  function spawnShoot(x, y) {
+    shoot.push({ x: x == null ? Math.random() * vw * 0.8 + vw * 0.2 : x, y: y == null ? Math.random() * vh * 0.4 : y, vx: -7 - Math.random() * 4, vy: 4 + Math.random() * 2, life: 60 });
+  }
+  function drawBg(t) {
+    bc.setTransform(dpr, 0, 0, dpr, 0, 0);
+    bc.clearRect(0, 0, vw, vh);
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      var a = reduce ? 0.7 : 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * s.s + s.p));
+      bc.globalAlpha = a;
+      bc.fillStyle = i % 9 === 0 ? '#ffc2d1' : (i % 7 === 0 ? '#ffd98a' : '#ffffff');
+      bc.beginPath(); bc.arc(s.x, s.y, s.r, 0, TAU); bc.fill();
+    }
+    bc.globalAlpha = 1;
+    shoot = shoot.filter(function (m) { return m.life > 0; });
+    shoot.forEach(function (m) {
+      m.x += m.vx; m.y += m.vy; m.life--;
+      var g = bc.createLinearGradient(m.x, m.y, m.x - m.vx * 9, m.y - m.vy * 9);
+      g.addColorStop(0, 'rgba(255,244,236,' + clamp(m.life / 40, 0, 1) + ')');
+      g.addColorStop(1, 'rgba(255,244,236,0)');
+      bc.strokeStyle = g; bc.lineWidth = 2.2; bc.lineCap = 'round';
+      bc.beginPath(); bc.moveTo(m.x, m.y); bc.lineTo(m.x - m.vx * 9, m.y - m.vy * 9); bc.stroke();
+    });
+  }
+
+  /* ---------- particles (hearts and sparkles) ---------- */
+  var fx = $('#fx'), fc = fx.getContext('2d');
+  var parts = [];
+  function fitFx() { fx.width = Math.round(innerWidth * dpr); fx.height = Math.round(innerHeight * dpr); }
+  var COLS = ['#ff6f91', '#ffc2d1', '#ffd98a', '#fff4ec'];
+  function heartPath(c, x, y, s) {
+    c.beginPath();
+    c.moveTo(x, y + s * 0.35);
+    c.bezierCurveTo(x - s * 1.1, y - s * 0.3, x - s * 0.5, y - s * 1.0, x, y - s * 0.45);
+    c.bezierCurveTo(x + s * 0.5, y - s * 1.0, x + s * 1.1, y - s * 0.3, x, y + s * 0.35);
+    c.closePath();
+  }
+  function burst(x, y, n, power) {
+    power = power || 1;
+    if (reduce) n = Math.ceil(n / 4);
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * TAU, sp = (1.5 + Math.random() * 5) * power;
+      parts.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2.2 * power, g: 0.08, s: 5 + Math.random() * 9, c: COLS[(Math.random() * COLS.length) | 0], life: 80 + Math.random() * 50, heart: Math.random() < 0.7, r: (Math.random() - 0.5) * 0.6 });
+    }
+  }
+  function drawFx() {
+    fc.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fc.clearRect(0, 0, innerWidth, innerHeight);
+    parts = parts.filter(function (p) { return p.life > 0; });
+    parts.forEach(function (p) {
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= 0.985; p.life--;
+      fc.save();
+      fc.globalAlpha = clamp(p.life / 30, 0, 1);
+      fc.fillStyle = p.c;
+      fc.translate(p.x, p.y); fc.rotate(p.r);
+      if (p.heart) { heartPath(fc, 0, 0, p.s); fc.fill(); }
+      else { fc.beginPath(); fc.arc(0, 0, p.s * 0.28, 0, TAU); fc.fill(); }
+      fc.restore();
+    });
+  }
+  function centerOf(el) { var b = el.getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2 }; }
+
+  /* ---------- page 1: wishes ---------- */
+  var WISHES = [
+    'I wish for you to laugh till your tummy hurts.',
+    'I wish every morning starts with you smiling.',
+    'I wish for a hundred more hugs today.',
+    'I wish your heart always feels safe with me.',
+    'I wish to make you the happiest person alive.',
+    'I wish we get to be silly together forever.'
+  ];
+  var wi = -1;
+  $('#wishBtn').addEventListener('click', function () {
+    wi = (wi + 1) % WISHES.length;
+    $('#wish').textContent = WISHES[wi];
+    spawnShoot(vw * 0.85, vh * 0.1);
+    spawnShoot(vw * 0.6, vh * 0.05);
+    var c = centerOf($('#wishBtn'));
+    burst(c.x, c.y, 16, 0.7);
+  });
+
+  /* ---------- page 2: constellation ---------- */
+  var cv = $('#const'), cc = cv.getContext('2d');
+  var pts = [], lit = 0, cDone = false, cw = 0, ch = 0, cdpr = 1;
+  var N = 10;
+  var heartTs = [];
+  for (var k = 0; k < N; k++) heartTs.push(Math.PI + k * TAU / N);
+  function fitConst() {
+    var r = cv.getBoundingClientRect();
+    cdpr = Math.min(window.devicePixelRatio || 1, 2);
+    cw = r.width; ch = r.height;
+    cv.width = Math.max(2, Math.round(cw * cdpr)); cv.height = Math.max(2, Math.round(ch * cdpr));
+    var sc = Math.min(cw, ch) / 36;
+    pts = heartTs.map(function (t) {
+      var x = 16 * Math.pow(Math.sin(t), 3);
+      var y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+      return { x: cw / 2 + x * sc, y: ch * 0.47 - (y + 2.5) * sc };
+    });
+  }
+  function drawConst(t) {
+    cc.setTransform(cdpr, 0, 0, cdpr, 0, 0);
+    cc.clearRect(0, 0, cw, ch);
+    if (!pts.length) return;
+    // lines
+    cc.lineWidth = 2.5; cc.lineCap = 'round'; cc.strokeStyle = 'rgba(255,194,209,0.9)';
+    cc.shadowColor = '#ff6f91'; cc.shadowBlur = 12;
+    cc.beginPath();
+    var upto = cDone ? N : lit - 1;
+    for (var i = 0; i <= upto; i++) {
+      var p = pts[i % N];
+      if (i === 0) cc.moveTo(p.x, p.y); else cc.lineTo(p.x, p.y);
+    }
+    if (upto >= 1) cc.stroke();
+    cc.shadowBlur = 0;
+    if (cDone) {
+      var pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
+      cc.beginPath();
+      pts.forEach(function (p, i) { if (i === 0) cc.moveTo(p.x, p.y); else cc.lineTo(p.x, p.y); });
+      cc.closePath();
+      cc.fillStyle = 'rgba(255,111,145,' + (0.18 + pulse * 0.12) + ')';
+      cc.fill();
+    }
+    // stars
+    pts.forEach(function (p, i) {
+      var isLit = cDone || i < lit;
+      var isNext = !cDone && i === lit;
+      var pulse = 0.5 + 0.5 * Math.sin(t * 4);
+      if (isNext) {
+        var rr = 14 + pulse * 10;
+        var g = cc.createRadialGradient(p.x, p.y, 0, p.x, p.y, rr);
+        g.addColorStop(0, 'rgba(255,217,138,0.9)'); g.addColorStop(1, 'rgba(255,217,138,0)');
+        cc.fillStyle = g; cc.beginPath(); cc.arc(p.x, p.y, rr, 0, TAU); cc.fill();
+      }
+      if (isLit) {
+        var g2 = cc.createRadialGradient(p.x, p.y, 0, p.x, p.y, 16);
+        g2.addColorStop(0, 'rgba(255,244,236,1)'); g2.addColorStop(1, 'rgba(255,111,145,0)');
+        cc.fillStyle = g2; cc.beginPath(); cc.arc(p.x, p.y, 16, 0, TAU); cc.fill();
+      }
+      cc.fillStyle = isLit ? '#fff4ec' : (isNext ? '#ffd98a' : 'rgba(185,169,220,0.7)');
+      cc.beginPath(); cc.arc(p.x, p.y, isLit || isNext ? 5 : 3.5, 0, TAU); cc.fill();
+    });
+  }
+  function litStar(i) {
+    lit = i + 1;
+    $('#starCount').textContent = lit + ' of ' + N + ' stars lit';
+    var r = cv.getBoundingClientRect();
+    burst(r.left + pts[i].x, r.top + pts[i].y, 6, 0.4);
+    if (lit === N) finishConst();
+  }
+  function finishConst() {
+    cDone = true;
+    $('#starCount').textContent = 'All ' + N + ' stars lit';
+    $('#reveal').textContent = 'A heart. Of course it is. That is what you are to me.';
+    var c = centerOf(cv);
+    burst(c.x, c.y, 70, 1.3);
+    spawnShoot(vw * 0.9, vh * 0.08);
+  }
+  cv.addEventListener('pointerdown', function (e) {
+    if (cDone) return;
+    var r = cv.getBoundingClientRect();
+    var x = e.clientX - r.left, y = e.clientY - r.top;
+    var p = pts[lit];
+    if (p && Math.hypot(x - p.x, y - p.y) < 34) litStar(lit);
+  });
+  cv.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!cDone) litStar(lit); }
+  });
+
+  /* ---------- page 3: letters ---------- */
+  var LETTERS = [
+    { w: 'you miss me', t: 'Close your eyes and put your hand on your heart. That small beat is me, saying I miss you too. Distance is only a number. You are always one thought away from me.' },
+    { w: 'you feel sad', t: 'You do not have to be okay right now. Talk to me, or say nothing and I will just sit beside you. You make my world softer, so let me do the same for you. I am not going anywhere.' },
+    { w: 'we argue', t: 'I would always choose us over being right. If I hurt you, I am sorry. Come here, take a breath, and we will fix it together, because you matter more than any fight.' },
+    { w: 'you cannot sleep', t: 'Count my I love yous instead of sheep. You will fall asleep before I run out. Sleep well, my love. I will be right here in your dreams.' }
+  ];
+  var envs = $('#envs'), slot = $('#paperSlot');
+  LETTERS.forEach(function (L, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'env'; b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = '<span class="flap"></span><span class="seal"></span><span class="open">open when</span><span class="when"></span>';
+    $('.when', b).textContent = 'Open when ' + L.w;
+    $('.when', b).textContent = L.w;
+    b.addEventListener('click', function () {
+      $$('.env').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      slot.innerHTML = '';
+      var d = document.createElement('div');
+      d.className = 'paper';
+      d.setAttribute('aria-live', 'polite');
+      var to = document.createElement('div'); to.className = 'to'; to.textContent = NAME ? 'My love ' + NAME + ',' : 'My love,';
+      var tx = document.createElement('div'); tx.textContent = L.t;
+      d.appendChild(to); d.appendChild(tx);
+      slot.appendChild(d);
+      var c = centerOf(b);
+      burst(c.x, c.y, 14, 0.6);
+      setTimeout(function () { d.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' }); }, 60);
+    });
+    envs.appendChild(b);
+  });
+
+  /* ---------- page 4: hug and kiss ---------- */
+  var hold = $('#hold'), kissBtn = $('#kiss'), scene = $('#hugScene');
+  var gL = $('#gL'), gR = $('#gR'), meter = $('#meter'), meterBox = $('#meterBox');
+  var holding = false, hp = 0, latch = 0, hugs = 0, kisses = 0, lastT = 0;
+  var STATUS_IDLE = ['Press and hold the button, and don’t let go.', 'Closer… keep holding.'];
+  function startHold() { holding = true; hold.classList.add('active'); }
+  function endHold() { holding = false; hold.classList.remove('active'); }
+  hold.addEventListener('pointerdown', function (e) { e.preventDefault(); try { hold.setPointerCapture(e.pointerId); } catch (x) {} startHold(); });
+  hold.addEventListener('pointerup', endHold);
+  hold.addEventListener('pointercancel', endHold);
+  hold.addEventListener('lostpointercapture', endHold);
+  hold.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); startHold(); } });
+  hold.addEventListener('keyup', function (e) { if (e.key === ' ' || e.key === 'Enter') endHold(); });
+  hold.addEventListener('blur', endHold);
+  hold.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  function updateCounts() { $('#counts').textContent = 'Hugs ' + hugs + ' · Kisses ' + kisses; }
+  function hugDone() {
+    hugs++; latch = 2400; updateCounts();
+    kissBtn.disabled = false;
+    $('#status').textContent = hugs === 1 ? 'There you are. This is my favourite place in the world.' : 'Hug number ' + hugs + '. I could do this all day.';
+    var c = centerOf(scene);
+    burst(c.x, c.y - 10, 50, 1.1);
+  }
+  function stepHug(dt) {
+    if (latch > 0) { latch -= dt; if (latch <= 0) { hp = 0; $('#status').textContent = kisses ? 'Again? Always.' : 'Want to go again, or send a kiss?'; } }
+    else if (holding) { hp = clamp(hp + dt / 1800, 0, 1); if (hp >= 1) hugDone(); else if (hp > 0.15 && hp < 0.5) $('#status').textContent = STATUS_IDLE[1]; }
+    else { hp = clamp(hp - dt / 900, 0, 1); }
+    var e = ease(hp);
+    var bob = reduce ? 0 : Math.sin(lastT * 3) * 2;
+    gL.setAttribute('transform', 'translate(' + lerp(90, 178, e).toFixed(1) + ',' + bob.toFixed(1) + ')');
+    gR.setAttribute('transform', 'translate(' + lerp(310, 222, e).toFixed(1) + ',' + (-bob).toFixed(1) + ')');
+    scene.classList.toggle('closed', hp > 0.55);
+    meter.style.width = (hp * 100).toFixed(0) + '%';
+    meterBox.setAttribute('aria-valuenow', String(Math.round(hp * 100)));
+  }
+  kissBtn.addEventListener('click', function () {
+    kisses++; updateCounts();
+    scene.classList.add('kiss', 'closed');
+    setTimeout(function () { scene.classList.remove('kiss'); }, 900);
+    var m = document.createElement('div');
+    m.className = 'mwah'; m.textContent = 'mwah'; m.setAttribute('aria-hidden', 'true');
+    m.addEventListener('animationend', function () { m.remove(); });
+    document.body.appendChild(m);
+    var c = centerOf(scene);
+    burst(c.x, c.y - 40, 40, 1);
+    $('#status').textContent = kisses === 1 ? 'A kiss, delivered straight to your cheek.' : 'Kiss number ' + kisses + '. I am not stopping.';
+  });
+
+  /* ---------- page 5 ---------- */
+  var REASONS = [
+    'Your laugh makes every bad day lighter.',
+    'You care so deeply, even about small things.',
+    'You are cute when you are angry and cuter when you pretend you are not.',
+    'I feel at home the moment you are near.',
+    'You make ordinary moments feel special.',
+    'You see the best in me, even when I forget it.',
+    'Your smile is my favourite view.',
+    'Because you are you, and I would pick you again every time.'
+  ];
+  var ri = 0;
+  function showReason() {
+    $('#rn').textContent = 'Reason ' + (ri + 1) + ' of ' + REASONS.length;
+    $('#rt').textContent = REASONS[ri];
+  }
+  $('#reason').addEventListener('click', function (e) {
+    ri = (ri + 1) % REASONS.length; showReason();
+    burst(e.clientX || centerOf(this).x, e.clientY || centerOf(this).y, 8, 0.5);
+  });
+  showReason();
+
+  var HEART_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21C-1 11 3 2 12 7c9-5 13 4 0 14z" fill="#ff6f91"/></svg>';
+  var VOWS = [
+    'I will hug you when words are not enough.',
+    'I will listen first and speak second.',
+    'I will make you laugh on your worst days.',
+    'I will remember the little things you tell me.',
+    'I will love you more tomorrow than today.'
+  ];
+  VOWS.forEach(function (v) {
+    var li = document.createElement('li');
+    li.innerHTML = HEART_SVG + '<span></span>';
+    $('span', li).textContent = v;
+    $('#vows').appendChild(li);
+  });
+
+  var loves = 0;
+  $('#sendLove').addEventListener('click', function () {
+    loves++;
+    $('#loveCount').textContent = 'Hearts sent: ' + loves;
+    var c = centerOf(this);
+    burst(c.x, c.y, 34, 1);
+    if (loves % 5 === 0) { burst(vw * 0.25, vh * 0.6, 40, 1.2); burst(vw * 0.75, vh * 0.6, 40, 1.2); }
+  });
+  var floatTimer = 0;
+  function startFloaty() {
+    if (reduce || floatTimer) return;
+    floatTimer = setInterval(function () {
+      var h = document.createElement('div');
+      h.className = 'floaty'; h.innerHTML = HEART_SVG; h.setAttribute('aria-hidden', 'true');
+      h.style.left = (Math.random() * 100) + 'vw';
+      h.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
+      h.style.animationDuration = (5 + Math.random() * 4) + 's';
+      h.addEventListener('animationend', function () { h.remove(); });
+      document.body.appendChild(h);
+    }, 700);
+  }
+  function stopFloaty() { clearInterval(floatTimer); floatTimer = 0; }
+
+  /* ---------- paging ---------- */
+  var pages = $$('.page');
+  var TITLES = ['Hello, love', 'The star that is you', 'Letters for later', 'Hug and kiss', 'My love letter'];
+  var NEXT = ['Begin →', 'Next →', 'Next →', 'Next →', 'Start again ↺'];
+  var reached = 0;
+  var dotsEl = $('#dots');
+  var dotBtns = pages.map(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'dot';
+    b.setAttribute('aria-label', 'Page ' + (i + 1) + ': ' + TITLES[i]);
+    b.addEventListener('click', function () { go(i); });
+    dotsEl.appendChild(b);
+    return b;
+  });
+  function render() {
+    $('#pageName').textContent = (cur + 1) + ' of 5 · ' + TITLES[cur];
+    dotBtns.forEach(function (b, i) {
+      b.classList.toggle('now', i === cur);
+      b.classList.toggle('seen', i !== cur && i <= reached);
+      if (i === cur) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    $('#back').disabled = cur === 0;
+    $('#next').textContent = NEXT[cur];
+  }
+  function go(n) {
+    if (n < 0 || n >= pages.length || n === cur) return;
+    pages.forEach(function (p, i) { p.classList.toggle('on', i === n); p.inert = i !== n; });
+    cur = n; reached = Math.max(reached, n);
+    pages[n].scrollTop = 0;
+    render();
+    endHold();
+    if (n === 1) setTimeout(fitConst, 60);
+    if (n === 4) { startFloaty(); setTimeout(function () { burst(vw / 2, vh * 0.4, 50, 1.1); }, 400); } else stopFloaty();
+  }
+  $('#back').addEventListener('click', function () { go(cur - 1); });
+  $('#next').addEventListener('click', function () { go(cur === 4 ? 0 : cur + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target && e.target.id === 'hold') return;
+    if (e.key === 'ArrowRight') go(cur + 1);
+    if (e.key === 'ArrowLeft') go(cur - 1);
+  });
+  render();
+
+  /* ---------- main loop ---------- */
+  function resize() { fitBg(); fitFx(); fitConst(); }
+  window.addEventListener('resize', resize);
+  resize();
+  var started = performance.now(), nextShoot = 4;
+  function frame(now) {
+    var t = (now - started) / 1000;
+    var dt = lastT ? Math.min(50, (t - lastT) * 1000) : 16;
+    lastT = t;
+    if (!reduce && t > nextShoot) { spawnShoot(); nextShoot = t + 5 + Math.random() * 7; }
+    drawBg(t);
+    drawFx();
+    if (cur === 1) drawConst(t);
+    if (cur === 3) stepHug(dt);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitConst);
+})();
+</script>
+
+</body></html>
